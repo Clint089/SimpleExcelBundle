@@ -1,6 +1,6 @@
 <?php
 
-namespace Onemedia\Simple\ExcelBundle;
+namespace Onemedia\SimpleExcelBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
