@@ -1,3 +1,3 @@
 services:
-    OnemediaSimpleExcel:
-        class: \Onemedia\SimpleExcelBundle\Lib\SimpleExcelReader
+    OnemediaSimpleExcelReader:
+        class: Onemedia\SimpleExcelBundle\Lib\SimpleExcelReader

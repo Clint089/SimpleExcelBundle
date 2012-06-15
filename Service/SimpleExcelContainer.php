@@ -30,11 +30,9 @@ class SimpleExcelContainer
 * @param $stream_writer
 * @param $response_service
 */
-    public function __construct($excelObj, $stream_writer, $response_service)
+    public function __construct()
     {
-        $this->setExcelObj($excelObj);
-        $this->setStreamWriter($stream_writer);
-        $this->setResponseService($response_service);
+
     }
 
     /**
