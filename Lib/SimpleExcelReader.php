@@ -11,6 +11,7 @@ namespace Onemedia\SimpleExcelBundle\Lib;
 
 class Reader2007{
     protected $skipAtEmptyRow = false;
+    protected $deleteEmptyRows = false;
     protected $data = array();
 
     public static $_controlCharacters = array();
@@ -55,11 +56,20 @@ class Reader2007{
         if(isset($configArray['skipAtEmptyRow'])){
             $this->setSkipAtEmptyRow($configArray['skipAtEmptyRow']);
         }
+
+        if(isset($configArray['deleteEmptyRows'])){
+            $this->setDeleteEmptyRows($configArray['deleteEmptyRows']);
+        }
     }
 
     public function setSkipAtEmptyRow($rowNumber){
 
         $this->skipAtEmptyRow = intval($rowNumber);
+    }
+
+    public function setDeleteEmptyRows($flag){
+
+        $this->deleteEmptyRows =  ($flag == true)? true : false;
     }
 
     protected function generateAllRowCols($spans){
@@ -234,6 +244,11 @@ class Reader2007{
                     foreach ($xmlSheet->sheetData->row as $row) {
                         if($rowNotEmpty === false){
                             $emptyRowCount++;
+                            if($this->deleteEmptyRows === true){
+                                unset($cleanArray[$matrix['row']]);
+                            }
+                        }else{
+                            $emptyRowCount = 0;
                         }
 
                         if($this->skipAtEmptyRow == false || $this->skipAtEmptyRow  > $emptyRowCount){
