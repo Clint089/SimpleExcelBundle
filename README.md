@@ -1,6 +1,6 @@
 SimpleExcel
 ===========
-This Bundle permits to read easly Excel-Files.
+This Bundle read simple Excel files.
 
 
 ## INSTALLATION
