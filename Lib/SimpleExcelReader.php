@@ -30,11 +30,11 @@ class Reader2007{
         $result = "";
         $next = false;
         // add each character to the result...
-        for($i = 1; $i<=$result_len; $i++){
+        for ($i = 1; $i<=$result_len; $i++) {
             $index = ($number % $abc_len) - 1; // calculate the module
 
             // sometimes the index should be decreased by 1
-            if( $next || $next = false ){
+            if ( $next || $next = false ) {
                 $index--;
             }
 
@@ -42,22 +42,22 @@ class Reader2007{
             $number = floor($number / strlen($abc));
 
             // if the index is negative, convert it to positive
-            if( $next = ($index < 0) ) {
+            if ( $next = ($index < 0) ) {
                 $index = $abc_len + $index;
             }
-
             $result = $abc[$index].$result; // concatenate the letter
         }
+        
         return $result;
     }
 
 
-    public function __construct($configArray){
-        if(isset($configArray['skipAtEmptyRow'])){
+    public function __construct($configArray) {
+        if (isset($configArray['skipAtEmptyRow'])) {
             $this->setSkipAtEmptyRow($configArray['skipAtEmptyRow']);
         }
 
-        if(isset($configArray['deleteEmptyRows'])){
+        if (isset($configArray['deleteEmptyRows'])) {
             $this->setDeleteEmptyRows($configArray['deleteEmptyRows']);
         }
     }
