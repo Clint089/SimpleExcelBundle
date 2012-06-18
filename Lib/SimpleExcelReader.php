@@ -3,7 +3,7 @@
 namespace Onemedia\SimpleExcelBundle\Lib;
 /**
  * Created by JetBrains PhpStorm.
- * User: al
+ * User: al, jh
  * Date: 14.06.12
  * Time: 17:18
  * To change this template use File | Settings | File Templates.
