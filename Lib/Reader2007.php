@@ -1,6 +1,8 @@
 <?php
 
 namespace Onemedia\SimpleExcelBundle\Lib;
+//require_once('NumerFormat.php');
+//require_once('Date.php');
 /**
  * Created by JetBrains PhpStorm.
  * User: al, jh
@@ -15,6 +17,10 @@ class Reader2007{
     protected $data = array();
 
     public static $_controlCharacters = array();
+    public static $CALENDAR_WINDOWS_1900 = 1900;		//	Base date of 1st Jan 1900 = 1.0
+    public static $CALENDAR_MAC_1904 = 1904;			//	Base date of 2nd Jan 1904 = 1.0
+    private static $ExcelBaseDate	= 1900;
+
 
 
     function numtochars($number){
@@ -47,7 +53,7 @@ class Reader2007{
             }
             $result = $abc[$index].$result; // concatenate the letter
         }
-        
+
         return $result;
     }
 
@@ -198,7 +204,6 @@ class Reader2007{
         $zip = new \ZipArchive;
 
         $zip->open($file);
-
         $rels = simplexml_load_string($this->_getFromZipArchive($zip, "_rels/.rels")); //~ http://schemas.openxmlformats.org/package/2006/relationships");
         foreach ($rels->Relationship as $rel) {
             if($rel['Type'] == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"){
@@ -209,12 +214,14 @@ class Reader2007{
                 $sharedStrings = array();
                 $xpath = self::array_item($relsWorkbook->xpath("rel:Relationship[@Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings']"));
                 $xmlStrings = simplexml_load_string($this->_getFromZipArchive($zip, "$dir/$xpath[Target]"));  //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main");
+
+
                 if (isset($xmlStrings) && isset($xmlStrings->si)) {
                     foreach ($xmlStrings->si as $val) {
                         if (isset($val->t)) {
                             $sharedStrings[] = self::ControlCharacterOOXML2PHP( (string) $val->t );
                         } elseif (isset($val->r)) {
-                            $sharedStrings[] = $this->_parseRichText($val);
+                            $sharedStrings[] = self::ControlCharacterOOXML2PHP( (string) $val->t);
                         }
                     }
                 }
@@ -285,6 +292,7 @@ class Reader2007{
                                     default:
                                         if (!isset($c->f)) {
                                             $value = self::_castToString($c);
+
                                         } else {
                                             throw new Exception('Formulas not implemented');
                                         }
@@ -310,5 +318,53 @@ class Reader2007{
         return $this->data;
     }
 
+    public static function ExcelToPHPObject($dateValue = 0) {
+        $dateTime = self::ExcelToPHP($dateValue);
+        $days = floor($dateTime / 86400);
+        $time = round((($dateTime / 86400) - $days) * 86400);
+        $hours = round($time / 3600);
+        $minutes = round($time / 60) - ($hours * 60);
+        $seconds = round($time) - ($hours * 3600) - ($minutes * 60);
+
+        $dateObj = date_create('1-Jan-1970+'.$days.' days');
+        $dateObj->setTime($hours,$minutes,$seconds);
+
+        return $dateObj;
+    }	//	function ExcelToPHPObject()
+
+    /**
+     * Convert a date from Excel to PHP
+     *
+     * @param	 long	 $dateValue		Excel date/time value
+     * @return	 long					PHP serialized date/time
+     */
+    public static function ExcelToPHP($dateValue = 0) {
+        if (self::$ExcelBaseDate == self::$CALENDAR_WINDOWS_1900) {
+            $myExcelBaseDate = 25569;
+            //	Adjust for the spurious 29-Feb-1900 (Day 60)
+            if ($dateValue < 60) {
+                --$myExcelBaseDate;
+            }
+        } else {
+            $myExcelBaseDate = 24107;
+        }
+
+        // Perform conversion
+        if ($dateValue >= 1) {
+            $utcDays = $dateValue - $myExcelBaseDate;
+            $returnValue = round($utcDays * 86400);
+            if (($returnValue <= PHP_INT_MAX) && ($returnValue >= -PHP_INT_MAX)) {
+                $returnValue = (integer) $returnValue;
+            }
+        } else {
+            $hours = round($dateValue * 24);
+            $mins = round($dateValue * 1440) - round($hours * 60);
+            $secs = round($dateValue * 86400) - round($hours * 3600) - round($mins * 60);
+            $returnValue = (integer) gmmktime($hours, $mins, $secs);
+        }
+
+        // Return
+        return $returnValue;
+    }	//	function ExcelToPHP()
 
 }
